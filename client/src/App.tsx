@@ -121,7 +121,7 @@ function App() {
     filters.castId !== undefined ||
     (filters.yearFrom !== undefined && filters.yearFrom !== MIN_YEAR) ||
     (filters.yearTo !== undefined && filters.yearTo !== CURRENT_YEAR);
-      let accountActions;
+  let accountActions;
 
   if (isAuthLoading) {
     accountActions = <output>Checking your session…</output>;
@@ -129,12 +129,12 @@ function App() {
     accountActions = (
       <>
         <span>Hello, {user.username}</span>
-        <Link to="/profile" className="login-link">
+        <Link to="/profile" className="account-link">
           Profile
         </Link>
         <button
           type="button"
-          className="login-link"
+          className="account-link"
           onClick={() => void handleLogout()}
           disabled={isLoggingOut}
         >
@@ -145,11 +145,11 @@ function App() {
   } else {
     accountActions = (
       <>
-        <Link to="/login" className="login-link">
+        <Link to="/login" className="account-link">
           Log in
         </Link>
 
-        <Link to="/signup" className="login-link">
+        <Link to="/signup" className="account-link">
           Register
         </Link>
       </>
