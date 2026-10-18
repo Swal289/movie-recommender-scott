@@ -16,18 +16,42 @@ npx --version
 ```
 If all of the above commands each provide a version number (whether they are the same or not), you have successfully installed Node.js.
 
-After this, the repo can be cloned. 
+After this, clone the repo and move into the project folder. All commands in this README are run from this folder (the one containing `package.json`):
+```shell
+git clone https://github.com/Team1-SOFTENG310/movie-recommender.git
+cd movie-recommender
+```
 
-The project installs the node dependencies from the root by running the below command:
+Install the node dependencies for the root, server and client with:
 ```shell
 npm run install:all
 ```
 
+> **Windows users:** if PowerShell says `npm.ps1 cannot be loaded because running scripts is disabled on this system`, run the following once and answer `Y`, then try again (or use Command Prompt instead of PowerShell):
+> ```powershell
+> Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
+> ```
+> If you see `ENOENT: no such file or directory, open '...\package.json'`, you are one folder too high; `cd` into the project folder first.
+>
+> Avoid keeping the project inside a OneDrive-synced folder (such as `OneDrive\Desktop`). OneDrive tries to sync the thousands of files in `node_modules`, which can make installs very slow or fail with `EPERM` errors.
+
 ### Setting up `.env`
 
-Because the website uses TMDB, you need a TMDB API key.
-The website uses mongoDB for user profiles, and rerquires both login credentials and for your current IP address to be whitelisted. Please get in contact on discord or at swal289@aucklandduni.ac.nz
-Copy `.env.example` to `.env` in the project root and fill in your values:
+Copy `.env.example` to a new file called `.env` in the project root and fill in your values. From the project folder:
+```shell
+cp .env.example .env      # macOS / Linux
+copy .env.example .env    # Windows
+```
+
+> **Windows users:** make sure the file is named exactly `.env`. If you create it in Notepad, set "Save as type" to **All Files**, otherwise it is saved as `.env.txt` and will not be found.
+
+**TMDB key:** create a free account at [themoviedb.org](https://www.themoviedb.org/signup), then go to **Settings → API**. Use the value labelled **API Key** (the short, 32-character v3 key), *not* the longer "API Read Access Token". The app sends the key as an `api_key` query parameter, so the read access token will cause every TMDB request to fail with `401`.
+
+**MongoDB:** the website uses MongoDB for user profiles, which requires login credentials and for your current IP address to be allowed in MongoDB Atlas. Please get in contact on Discord or at swal289@aucklanduni.ac.nz. MongoDB is optional for working on features that don't use accounts (see degraded mode below).
+
+**AI recommendations:** the "Generate AI recommendations" button on a movie's graph calls the backend at `/api/llm-recommender`, which needs an OpenAI key in `LLM_API_KEY` (`OPENAI_API_KEY` also works). Ask the team for the key; never commit it. To work on the UI without a key, set `VITE_AI_MOCK=true`, which fills the card with TMDB's own recommendations instead.
+
+Your `.env` should look like this once completed:
 ```
 TMDB_API_KEY=
 VITE_TMDB_API_KEY=yourKeyHere
@@ -37,6 +61,8 @@ MONGODB_USERNAME="user"
 MONGODB_PASSWORD="password"
 MONGODB_URI="uri"
 SESSION_SECRET="replace-with-a-long-random-secret"
+LLM_API_KEY=
+# VITE_AI_MOCK=true
 ```
 `TMDB_API_KEY` is used by the server and falls back to `VITE_TMDB_API_KEY` when empty.
 Never put secrets in `VITE_*` variables: Vite includes them in the browser bundle.
@@ -49,6 +75,14 @@ The dev servers for both the ExpressJS server and React client can be run concur
 npm run dev
 ```
 The frontend server will be open on `localhost:5173` by default, while the backend server will be at `localhost:5000`.
+
+If you change `.env`, stop the servers (`Ctrl+C`) and run `npm run dev` again so the new values are picked up.
+
+### Running the Tests
+Run the client and server test suites from the project root with:
+```
+npm test
+```
 
 ### User Accounts
 
@@ -64,8 +98,6 @@ Account features require the backend to be running and connected to MongoDB. If 
 
 ## Learn More
 If you want to contribute or learn more about the project, please consider viewing the [Contributor Guidelines](CONTRIBUTING.md).
-
-For an explanation of the application flow and the responsibilities of its components and modules, see the [Project Guide](PROJECT_GUIDE.md).
 
 You may also wish to view our [Code of Conduct](CODE_OF_CONDUCT.md).
 
