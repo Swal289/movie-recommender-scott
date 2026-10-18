@@ -269,7 +269,7 @@ describe("Profile", () => {
     await user.click(screen.getByRole("button", { name: "Log out" }));
 
     expect(await screen.findByRole("alert")).toHaveTextContent(
-      "Could not log out",
+      "Unable to log out. Please try again.",
     );
 
     expect(screen.getByText(testUser.email)).toBeInTheDocument();

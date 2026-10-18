@@ -21,11 +21,8 @@ export default function Profile() {
       await logout();
       void navigate("/", { replace: true });
     } catch (error: unknown) {
-      setLogoutError(
-        error instanceof Error
-          ? error.message
-          : "Unable to log out. Please try again.",
-      );
+      console.error("Failed to log out of profile:", error);
+      setLogoutError("Unable to log out. Please try again.");
       setIsLoggingOut(false);
     }
   }
@@ -39,6 +36,8 @@ export default function Profile() {
   }
 
   if (!user) {
+    // logout() clears the user before handleLogout navigates.
+    // Keeps logout navigation on the homepage instead of redirecting to login.
     return <Navigate to={isLoggingOut ? "/" : "/login"} replace />;
   }
 
@@ -76,7 +75,7 @@ export default function Profile() {
       </section>
       {logoutError && (
         <p className="profile-error" role="alert">
-            {logoutError}
+          {logoutError}
         </p>
       )}
 

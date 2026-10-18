@@ -109,7 +109,7 @@
   margin-bottom: 1rem;
 }
 
-.login-link {
+.account-link {
   display: inline-block;
   padding: 0.6rem 1.2rem;
   color: #0c0c0f;
@@ -123,16 +123,16 @@
   cursor: pointer;
 }
 
-.login-link:hover {
+.account-link:hover {
   background-color: #dbc08d;
 }
 
-.login-link:focus-visible {
+.account-link:focus-visible {
   outline: 2px solid #c8a96e;
   outline-offset: 3px;
 }
 
-.login-link:disabled {
+.account-link:disabled {
   opacity: 0.6;
   cursor: wait;
 }
