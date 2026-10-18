@@ -5,6 +5,7 @@ import type { AppConfig } from "./config.js";
 import { isDatabaseConnected } from "./db.js";
 import { errorHandler, notFound } from "./middleware/error.middleware.js";
 import { createAuthRouter } from "./routes/auth.routes.js";
+import { createHistoryRouter } from "./routes/history.routes.js";
 import { createLlmRecommendationRouter } from "./routes/llmRecommendation.routes.js";
 import { createMoviesRouter } from "./routes/movies.routes.js";
 import { createTmdbClient, type TmdbClient } from "./tmdb/tmdb.client.js";
@@ -42,6 +43,7 @@ export function createApp(
     });
   });
   app.use("/api/auth", createAuthRouter(config, deps));
+  app.use("/api/history", createHistoryRouter(deps));
   app.use("/api/movies", createMoviesRouter(deps));
   app.use("/api/llm-recommender", createLlmRecommendationRouter(config));
 
