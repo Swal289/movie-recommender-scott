@@ -9,6 +9,7 @@
 }
 
 .movie-graph__canvas {
+  position: relative; /* anchors the AI recommendation overlay */
   width: 100%;
   min-width: 0;
   overflow: hidden;

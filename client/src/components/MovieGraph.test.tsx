@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { http, HttpResponse } from "msw";
@@ -177,7 +177,8 @@ describe("MovieGraph", () => {
         // Wait for the complete 2-level graph to finish rendering
         await screen.findByRole("button", { name: "unique" });
 
-        const allButtons = screen.getAllByRole("button");
+        // only count node buttons inside the graph (not overlay controls like the AI button)
+        const allButtons = within(screen.getByTestId("graph")).getAllByRole("button");
         const nodeIds = allButtons.map((btn) => btn.getAttribute("data-node-id"));
 
         // Verify exactly 5 unique nodes were created (Root, 2x L1, 2x L2)

@@ -11,6 +11,7 @@ import {
   type MovieGraphLink,
   type MovieGraphNode,
 } from "./movieGraphData";
+import AiRecommendationPanel from "./AiRecommendations/AiRecommendationPanel";
 import "./MovieGraph.css";
 
 const GRAPH_HEIGHT = 600;
@@ -236,6 +237,7 @@ export default function MovieGraph({ movieId, title, year }: Readonly<Props>) {
             onEngineStop={handleEngineStop}
           />
         )}
+        <AiRecommendationPanel movieId={movieId} title={title} year={year} />
       </div>
       <p className="movie-graph__status" aria-live="polite"> 
         {status}
