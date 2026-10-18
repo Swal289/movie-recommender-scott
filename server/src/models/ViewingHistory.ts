@@ -4,6 +4,9 @@ import mongoose, { type Model, type Types } from "mongoose";
 export interface ViewingHistoryFields {
   userId: Types.ObjectId;
   movieId: number;
+  title: string;
+  posterPath: string | null;
+  releaseDate: string | null;
   lastViewedAt: Date;
 }
 
@@ -22,6 +25,22 @@ const viewingHistorySchema = new mongoose.Schema<ViewingHistoryFields>(
         validator: Number.isInteger,
         message: "movieId must be an integer",
       },
+    },
+    title: {
+      type: String,
+      required: true,
+      trim: true,
+      maxlength: 200,
+    },
+    posterPath: {
+      type: String,
+      default: null,
+      maxlength: 300,
+    },
+    releaseDate: {
+      type: String,
+      default: null,
+      maxlength: 10,
     },
     lastViewedAt: {
       type: Date,

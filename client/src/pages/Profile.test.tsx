@@ -47,6 +47,9 @@ function useAuthenticatedSession() {
     http.get(`${BASE_URL}/auth/me`, () =>
       HttpResponse.json({ user: testUser }),
     ),
+    http.get(`${BASE_URL}/history/viewed`, () =>
+      HttpResponse.json({ items: [], page: 1, limit: 20, total: 0, totalPages: 0 }),
+    ),
   );
 }
 
@@ -143,7 +146,7 @@ describe("Profile", () => {
     expect(screen.queryByRole("status")).not.toBeInTheDocument();
   });
 
-  it("includes a placeholder for viewing history", async () => {
+  it("shows an empty state when the user has no viewing history", async () => {
     useAuthenticatedSession();
     renderProfile();
 
@@ -151,7 +154,59 @@ describe("Profile", () => {
 
     expect(
       screen.getByRole("region", { name: "Viewing history" }),
-    ).toHaveTextContent("Viewing history is coming soon.");
+    ).toHaveTextContent("You haven’t viewed any movies yet.");
+  });
+
+  it("renders movie snapshots and loads the next history page", async () => {
+    const user = userEvent.setup();
+    const requestedPages: string[] = [];
+
+    useAuthenticatedSession();
+    server.use(
+      http.get(`${BASE_URL}/history/viewed`, ({ request }) => {
+        const page = new URL(request.url).searchParams.get("page") ?? "1";
+        requestedPages.push(page);
+        const entry = page === "1"
+          ? {
+              movieId: 123,
+              title: "First Movie",
+              posterPath: "/first.jpg",
+              releaseDate: "2024-01-02",
+              lastViewedAt: "2025-03-04T12:00:00.000Z",
+            }
+          : {
+              movieId: 456,
+              title: "Second Movie",
+              posterPath: null,
+              releaseDate: null,
+              lastViewedAt: "2025-03-05T12:00:00.000Z",
+            };
+
+        return HttpResponse.json({
+          items: [entry],
+          page: Number(page),
+          limit: 1,
+          total: 2,
+          totalPages: 2,
+        });
+      }),
+    );
+
+    renderProfile();
+    await waitForProfile();
+
+    expect(await screen.findByRole("link", { name: /First Movie/ })).toHaveAttribute(
+      "href",
+      "/movie/123",
+    );
+
+    await user.click(screen.getByRole("button", { name: "Load more" }));
+
+    expect(await screen.findByRole("link", { name: /Second Movie/ })).toHaveAttribute(
+      "href",
+      "/movie/456",
+    );
+    expect(requestedPages).toEqual(["1", "2"]);
   });
 
   it("returns to movies without logging out when Back to movies is clicked", async () => {

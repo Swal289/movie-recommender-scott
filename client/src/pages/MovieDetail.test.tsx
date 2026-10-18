@@ -1,4 +1,5 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render as renderRTL, screen, waitFor } from "@testing-library/react";
+import type { ReactNode } from "react";
 import { Link, MemoryRouter, Route, Routes } from "react-router-dom";
 import MovieDetail from "./MovieDetail";
 import { server } from "../test/server";
@@ -7,6 +8,12 @@ import App from "../App";
 import userEvent from "@testing-library/user-event";
 import LocationDisplay from "../test/LocationDisplay";
 import { AuthProvider } from "../context/AuthProvider";
+
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+
+function render(ui: ReactNode) {
+  return renderRTL(<AuthProvider>{ui}</AuthProvider>);
+}
 
 describe("MovieDetail", () => {
   afterEach(() => {
@@ -103,6 +110,37 @@ describe("MovieDetail", () => {
     expect(screen.getByText("Bobby")).toBeInTheDocument();
   });
 
+  it("records a successfully loaded movie for a logged-in user", async () => {
+    let recordedMovie: unknown;
+    server.use(
+      http.get(`${BASE_URL}/auth/me`, () =>
+        HttpResponse.json({ user: { id: "user-1", username: "film_fan", email: "film@example.com" } }),
+      ),
+      http.post(`${BASE_URL}/history/viewed`, async ({ request }) => {
+        recordedMovie = await request.json();
+        return new HttpResponse(null, { status: 204 });
+      }),
+    );
+
+    render(
+      <MemoryRouter initialEntries={["/movie/574475"]}>
+        <Routes>
+          <Route path="/movie/:id" element={<MovieDetail />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    await screen.findByRole("heading", { name: "Final Destination Bloodlines" });
+    await waitFor(() => {
+      expect(recordedMovie).toEqual({
+        movieId: 574475,
+        title: "Final Destination Bloodlines",
+        posterPath: "/final-destination-bloodlines.jpg",
+        releaseDate: "2025-05-14",
+      });
+    });
+  });
+
   // Test 6: Movie not found error
   it("shows an error when API returns 404", async () => {
     server.use(
@@ -126,15 +164,13 @@ describe("MovieDetail", () => {
     const user = userEvent.setup();
 
     render(
-      <AuthProvider>
-        <MemoryRouter initialEntries={["/", "/movie/574475"]} initialIndex={1}>
+      <MemoryRouter initialEntries={["/", "/movie/574475"]} initialIndex={1}>
           <LocationDisplay/>
           <Routes>
             <Route path="/" element={<App />} />
             <Route path="/movie/:id" element={<MovieDetail />} />
           </Routes>
         </MemoryRouter>,
-      </AuthProvider>
     );
 
     await screen.findByText("Final Destination Bloodlines");

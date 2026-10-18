@@ -7,6 +7,8 @@ import MovieGraph from "../components/MovieGraph";
 import ReviewsList from "../components/ReviewsList";
 import { fetchMovieDetails } from "../api/movieDetails";
 import { isAbortError } from "../api/tmdb";
+import { recordViewedMovie } from "../api/viewingHistory";
+import { useAuth } from "../hooks/useAuth";
 import type { TmdbCastMember, TmdbMovieDetails } from "../types/tmdb";
 
 const IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w500";
@@ -46,6 +48,7 @@ function CastList({ cast }: Readonly<{ cast: TmdbCastMember[] }>) {
 export default function MovieDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const [movie, setMovie] = useState<TmdbMovieDetails | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -82,6 +85,19 @@ export default function MovieDetail() {
 
     return () => controller.abort();
   }, [id]);
+
+  useEffect(() => {
+    if (!user || !movie || !id || String(movie.id) !== id) {
+      return;
+    }
+
+    void recordViewedMovie({
+      movieId: movie.id,
+      title: movie.title,
+      posterPath: movie.poster_path,
+      releaseDate: movie.release_date,
+    }).catch(() => undefined);
+  }, [id, movie, user?.id]);
 
   //loading section
   if (loading) {
